@@ -63,12 +63,10 @@ public class SocialClientRegistration {
                 .redirectUri("http://localhost:8080/login/oauth2/code/facebook")
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .scope("public_profile", "email")
-                .authorizationUri("https://accounts.google.com/o/oauth2/v2/auth")
-                .tokenUri("https://www.googleapis.com/oauth2/v4/token")
-                .jwkSetUri("https://www.googleapis.com/oauth2/v3/certs")
-                .issuerUri("https://accounts.google.com")
-                .userInfoUri("https://www.googleapis.com/oauth2/v3/userinfo")
-                .userNameAttributeName(IdTokenClaimNames.SUB)
+                .authorizationUri("https://www.facebook.com/v12.0/dialog/oauth")
+                .tokenUri("https://graph.facebook.com/v12.0/oauth/access_token")
+                .userInfoUri("https://graph.facebook.com/me")
+                .userNameAttributeName("id")
                 .build();
     }
 }

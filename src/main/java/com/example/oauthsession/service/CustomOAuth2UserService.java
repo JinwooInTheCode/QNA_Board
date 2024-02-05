@@ -41,22 +41,21 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
         
         // 구현
-        String providerId = oAuth2Response.getProvider()+" "+oAuth2Response.getProviderId();
+        String providerId = oAuth2Response.getProvider()+"_"+oAuth2Response.getProviderId();
         String email = oAuth2Response.getEmail();
-        String loginId = registrationId+"_"+providerId;
         String nickname = oAuth2Response.getName();
 
-        UserEntity existData = userRepository.findByLoginId(loginId);
+        UserEntity existData = userRepository.findByProviderId(providerId);
 
         String role = null;
 
         // 유저 정보가 없을 경우(처음 로그인) 유저 정보 추가
         if(existData == null){
             UserEntity userEntity = new UserEntity();
-            userEntity.setUsername(nickname);
             userEntity.setEmail(email);
-            userEntity.setId(loginId);
-            userEntity.set
+            userEntity.setUsername(nickname);
+            userEntity.setProvider(registrationId);
+            userEntity.setProviderId(providerId);
             userEntity.setRole("ROLE_USER");
 
             userRepository.save(userEntity);
