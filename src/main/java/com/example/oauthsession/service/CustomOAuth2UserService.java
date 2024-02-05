@@ -1,6 +1,8 @@
 package com.example.oauthsession.service;
 
 import com.example.oauthsession.dto.*;
+import com.example.oauthsession.entity.UserEntity;
+import com.example.oauthsession.repository.UserRepository;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -9,6 +11,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
+
+    private final UserRepository userRepository;
+    public CustomOAuth2UserService(UserRepository userRepository){
+        this.userRepository = userRepository;
+    }
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException{
         OAuth2User oAuth2User = super.loadUser(userRequest);
@@ -32,8 +39,35 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         else{
             return null;
         }
+        
+        // 구현
+        String providerId = oAuth2Response.getProvider()+" "+oAuth2Response.getProviderId();
+        String email = oAuth2Response.getEmail();
+        String loginId = registrationId+"_"+providerId;
+        String nickname = oAuth2Response.getName();
 
-        String role = "ROLE_USER";
+        UserEntity existData = userRepository.findByLoginId(loginId);
+
+        String role = null;
+
+        // 유저 정보가 없을 경우(처음 로그인) 유저 정보 추가
+        if(existData == null){
+            UserEntity userEntity = new UserEntity();
+            userEntity.setUsername(nickname);
+            userEntity.setEmail(email);
+            userEntity.setId(loginId);
+            userEntity.set
+            userEntity.setRole("ROLE_USER");
+
+            userRepository.save(userEntity);
+        }
+        // 유저 정보가 있을 경우(로그인 이력 존재) 유저 정보 업데이트
+        else{
+            role = existData.getRole();
+            existData.setEmail(oAuth2Response.getEmail());
+
+            userRepository.save(existData);
+        }
 
         return new CustomOAuth2User(oAuth2Response, role);
     }
