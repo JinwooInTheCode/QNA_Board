@@ -65,7 +65,7 @@ public class SocialClientRegistration {
                 .scope("public_profile", "email")
                 .authorizationUri("https://www.facebook.com/v12.0/dialog/oauth")
                 .tokenUri("https://graph.facebook.com/v12.0/oauth/access_token")
-                .userInfoUri("https://graph.facebook.com/me")
+                .userInfoUri("https://graph.facebook.com/v12.0/me?fields=id,first_name,middle_name,last_name,name,email")
                 .userNameAttributeName("id")
                 .build();
     }
