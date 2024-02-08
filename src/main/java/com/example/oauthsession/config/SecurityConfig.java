@@ -32,7 +32,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         http
-                .csrf((csrf) -> csrf.disable());
+                .authorizeHttpRequests((auth) -> auth
+                        // 작동순서: 위에서 아래로 -> 즉, 아래에서 모든 권한을 다룰 수 있도록 하자.
+                        .requestMatchers("/", "/oauth2/**", "/login/**", "/loginProc", "/join", "/joinProc").permitAll()
+                        .requestMatchers("/admin").hasRole("ADMIN")
+                        .requestMatchers("/my/**").hasAnyRole("ADMIN", "USER")
+                        .anyRequest().authenticated());
         http
                 .formLogin((login) -> login.loginPage("/login")
                         .loginProcessingUrl("/loginProc")
@@ -49,12 +54,7 @@ public class SecurityConfig {
                         .userInfoEndpoint((userInfoEndpointConfig) ->
                                 userInfoEndpointConfig.userService(customOAuth2UserService)));
         http
-                .authorizeHttpRequests((auth) -> auth
-                        // 작동순서: 위에서 아래로 -> 즉, 아래에서 모든 권한을 다룰 수 있도록 하자.
-                        .requestMatchers("/", "/oauth2/**", "/login/**", "/loginProc", "/join", "/joinProc").permitAll()
-                        .requestMatchers("/admin").hasRole("ADMIN")
-                        .requestMatchers("/my/**").hasAnyRole("ADMIN", "USER")
-                        .anyRequest().authenticated());
+                .csrf((csrf) -> csrf.disable());
 
         return http.build();
     }
