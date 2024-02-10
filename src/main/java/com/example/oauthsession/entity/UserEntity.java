@@ -18,4 +18,5 @@ public class UserEntity {
     private String role;
     private String provider;
     private String providerId;
+    private String refreshToken;
 }
