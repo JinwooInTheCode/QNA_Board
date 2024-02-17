@@ -63,9 +63,9 @@ public class SocialClientRegistration {
                 .redirectUri("http://localhost:8080/login/oauth2/code/facebook")
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .scope("public_profile", "email")
-                .authorizationUri("https://www.facebook.com/v12.0/dialog/oauth")
-                .tokenUri("https://graph.facebook.com/v12.0/oauth/access_token")
-                .userInfoUri("https://graph.facebook.com/v12.0/me?fields=id,first_name,middle_name,last_name,name,email")
+                .authorizationUri("https://www.facebook.com/v2.8/dialog/oauth")
+                .tokenUri("https://graph.facebook.com/v2.8/oauth/access_token")
+                .userInfoUri("https://graph.facebook.com/me?fields=id,name,email")
                 .userNameAttributeName("id")
                 .build();
     }
