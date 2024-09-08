@@ -1,29 +1,26 @@
-server:
-  port: 8080
-  servlet:
-    encoding:
-      force-response: true
-
 spring:
+  h2:
+    console:
+      enabled: true
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url:
-      jdbc: mysql://localhost:3306/db_member?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
-    username: user_jssa
-    password: 1234
-
-#Entity\uAE30\uBC18\uC73C\uB85C MySQL DB\uC758 \uD14C\uC774\uBE14 \uC790\uB3D9 \uC0DD\uC131 \uC5EC\uBD80
-#create: Entity\uB85C \uB4F1\uB85D\uB41C \uD074\uB798\uC2A4\uC640 \uB9E4\uD551\uB418\uB294 \uD14C\uC774\uBE14 \uC0C8\uB85C \uC0DD\uC131 -> \uAE30\uC874\uC5D0 \uD574\uB2F9 \uD074\uB798\uC2A4\uC640 \uB9E4\uD551\uB418\uB294 \uD14C\uC774\uBE14 \uC874\uC7AC\uC2DC \uAE30\uC874 \uD14C\uC774\uBE14 \uC0AD\uC81C \uD6C4 \uC0DD\uC131
-#create-drop: create\uC640 \uD761\uC0AC\uD558\uC9C0\uB9CC \uC885\uB8CC \uC2DC, \uD14C\uC774\uBE14 \uC0AD\uC81C
-#update: create\uC640 \uD761\uC0AC but, \uAE30\uC874 \uD14C\uC774\uBE14 \uC874\uC7AC\uC2DC column\uC758 \uC18D\uC131(nullable, \uD06C\uAE30, \uB370\uC774\uD130 \uD0C0\uC785 \uB4F1)\uC740 \uAC74\uB4DC\uB9AC\uC9C0 X, \uC0C8\uB85C\uC6B4 column\uC774 \uCD94\uAC00\uB418\uB294 \uBCC0\uACBD\uC0AC\uD56D\uB9CC \uBC18\uC601
-#validate: \uB2E4\uB978 \uC18D\uC131\uACFC\uB294 \uB2E4\uB974\uAC8C DDL\uC744 \uC791\uC131\uD558\uC5EC \uD14C\uC774\uBE14 \uC0DD\uC131, \uC218\uC815 X -> Entity \uD074\uB798\uC2A4\uC640 \uD14C\uC774\uBE14\uC774 \uC815\uC0C1\uC801\uC73C\uB85C \uB9E4\uD551\uB418\uB294\uC9C0\uB9CC \uAC80\uC0AC, \uD14C\uC774\uBE14 \uC544\uC608 \uC5C6\uAC70\uB098, \uD14C\uC774\uBE14\uC5D0 Entity\uC758 \uD544\uB4DC\uC5D0 \uB9E4\uD551\uB418\uB294 column\uC774 \uC5C6\uC73C\uBA74 \uC608\uC678 \uBC1C\uC0DD \uD6C4 \uC885\uB8CC
-#none: \uC0DD\uC131 X-> \uB0B4\uC6A9 \uB36E\uC5B4\uC500 X)
+    url: jdbc:h2:~/sex
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  logging:
+    level:
+      org.hibernate.SQL: debug
+      org.hibernate.orm.jdbc.bind: debug
   jpa:
     hibernate:
-      ddl-auto: update
-#Entity\uC5D0\uC11C \uC124\uC815\uD55C \uBCC0\uC218\uBA85\uC744 MySQL \uB514\uBE44 \uD14C\uC774\uBE14 \uC0DD\uC131\uC2DC \uADF8\uB300\uB85C \uB9E4\uD551
+      ddl-auto: create
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+        hibernate:
+#            show_sql: true
+            format_sql: true
+            dialect: org.hibernate.dialect.H2Dialect
   security:
     oauth2:
       client:
@@ -39,6 +36,7 @@ spring:
           #google registration
           google:
             client-name: google
+            client-id: 1014833639656-5ttut4am78mtltg7vcuj4o4tvg24hvf8.apps.googleusercontent.com
             client-secret: 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
             redirect-uri: http://localhost:8080/login/oauth2/code/google
             authorization-grant-type: authorization_code
