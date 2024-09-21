@@ -3,7 +3,7 @@ spring:
     console:
       enabled: true
   datasource:
-    url: jdbc:h2:~/sex
+    url: jdbc:h2:tcp://localhost/~/sex
     username: sa
     password:
     driver-class-name: org.h2.Driver
@@ -13,7 +13,7 @@ spring:
       org.hibernate.orm.jdbc.bind: debug
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     properties:
