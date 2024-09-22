@@ -1,4 +1,4 @@
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
@@ -7,7 +7,7 @@
     <title>회원가입</title>
 </head>
 <body>
-    <form action="/joinProc" method="post" name="joinForm">
+    <form th:action="@{/joinProc}" method="post" name="joinForm">
         <input type="text" name="username" placeholder="Username"/><br>
         <input type="password" name="password" placeholder="Password"/><br>
         <input type="submit" value="Join"/><br>

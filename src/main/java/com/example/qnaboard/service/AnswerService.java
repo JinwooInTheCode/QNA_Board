@@ -8,6 +8,9 @@ import com.example.qnaboard.repository.QuestionRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Service
 public class AnswerService {
     private final AnswerRepository answerRepository;
@@ -20,19 +23,20 @@ public class AnswerService {
 
     // 댓글 작성
     @Transactional
-    public void addAnswer(Long questionId, String content) {
+    public void add(Long questionId, String content, User author) {
         // 댓글을 작성할 질문을 찾는다.
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 질문이 없습니다."));
         Answer answer = new Answer();
         answer.setQuestion(question);
         answer.setContent(content);
-        answer.setAuthor(question.getAuthor());
+        answer.setAuthor(author);
+        answer.setCreatedAt(LocalDateTime.now());
         answerRepository.save(answer);
     }
     // 댓글 수정
     @Transactional
-    public void editAnswer(Long answerId, String newContent, User author) {
+    public void edit(Long answerId, String newContent, User author) {
         Answer answer = answerRepository.findById(answerId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다."));
         // 작성자 확인
@@ -44,7 +48,7 @@ public class AnswerService {
     }
     // 댓글 삭제
     @Transactional
-    public void deleteAnswer(Long answerId, User author){
+    public void delete(Long answerId, User author){
         Answer answer = answerRepository.findById(answerId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다."));
         // 작성자 확인

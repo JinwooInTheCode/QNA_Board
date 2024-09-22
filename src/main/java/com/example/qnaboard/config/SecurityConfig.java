@@ -6,16 +6,19 @@ import com.example.qnaboard.service.CustomOAuth2UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
     @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder(){
+    PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
 
@@ -36,9 +39,9 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((auth) -> auth
                         // 작동순서: 위에서 아래로 -> 즉, 아래에서 모든 권한을 다룰 수 있도록 하자.
-                        .requestMatchers("/", "/oauth2/**", "/login/**", "/loginProc", "/join", "/joinProc", "/qna/**").permitAll()
-                        .requestMatchers("/admin").hasRole("ADMIN")
-                        .requestMatchers("/my/**", "/qna/new", "/qna/delete/**", "/qna/edit/**").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers("/", "/oauth2/**", "/login/**", "/loginProc", "/join", "/joinProc", "/question/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/my/**", "/question/new", "/question/delete/**", "/question/edit/**").hasAnyRole("ADMIN", "USER")
                         .anyRequest().authenticated());
         http
                 .formLogin((login) -> login.loginPage("/login")

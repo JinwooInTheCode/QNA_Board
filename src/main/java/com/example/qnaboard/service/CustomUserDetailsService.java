@@ -41,10 +41,9 @@ public class CustomUserDetailsService implements UserDetailsService {
         Optional<User> userOptional = userRepository.findByUsername(username);
         User user = userOptional.
                 orElseThrow(() -> new UsernameNotFoundException("해당 사용자는 없습니다: " + username));
-        String encodedPassword = passwordEncoder.encode(user.getPassword());
 
         return withUsername(user.getUsername())
-                .password(encodedPassword)
+                .password(user.getPassword())
                 .roles(user.getRole())
                 .build();
     }
