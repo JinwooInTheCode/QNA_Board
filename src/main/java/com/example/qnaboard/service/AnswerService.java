@@ -23,14 +23,14 @@ public class AnswerService {
 
     // 댓글 작성
     @Transactional
-    public void add(Long questionId, String content, User author) {
+    public void add(Question question, String content) {
         // 댓글을 작성할 질문을 찾는다.
-        Question question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 질문이 없습니다."));
+//        Question question = questionRepository.findById(questionId)
+//                .orElseThrow(() -> new IllegalArgumentException("해당 질문이 없습니다."));
         Answer answer = new Answer();
         answer.setQuestion(question);
         answer.setContent(content);
-        answer.setAuthor(author);
+//        answer.setAuthor(author);
         answer.setCreatedAt(LocalDateTime.now());
         answerRepository.save(answer);
     }

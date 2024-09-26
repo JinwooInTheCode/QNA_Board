@@ -1,5 +1,6 @@
 package com.example.qnaboard.entity;
 
+import com.example.qnaboard.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,7 +19,8 @@ public class User {
     private String username;
     private String password;
     private String email;
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private Role state;
     private String provider;
     private String providerId;
     private String refreshToken;

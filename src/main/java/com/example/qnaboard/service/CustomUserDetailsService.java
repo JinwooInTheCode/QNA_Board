@@ -1,5 +1,6 @@
 package com.example.qnaboard.service;
 
+import com.example.qnaboard.Role;
 import com.example.qnaboard.entity.User;
 import com.example.qnaboard.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
@@ -31,7 +32,7 @@ public class CustomUserDetailsService implements UserDetailsService {
             admin.setUsername("admin");
             admin.setPassword(passwordEncoder.encode("admin"));
             admin.setEmail("admin@example.com");
-            admin.setRole("ROLE_ADMIN");
+            admin.setState(Role.ADMIN);
             userRepository.save(admin);
         }
     }
@@ -44,7 +45,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         return withUsername(user.getUsername())
                 .password(user.getPassword())
-                .roles(user.getRole())
+                .roles(user.getState().value())
                 .build();
     }
 }

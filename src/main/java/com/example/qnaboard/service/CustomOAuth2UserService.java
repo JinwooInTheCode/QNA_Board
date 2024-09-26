@@ -1,5 +1,6 @@
 package com.example.qnaboard.service;
 
+import com.example.qnaboard.Role;
 import com.example.qnaboard.dto.*;
 import com.example.qnaboard.entity.User;
 import com.example.qnaboard.repository.UserRepository;
@@ -56,13 +57,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             user.setUsername(nickname);
             user.setProvider(registrationId);
             user.setProviderId(providerId);
-            user.setRole("ROLE_USER");
+            user.setState(Role.USER);
 
             userRepository.save(user);
         }
         // 유저 정보가 있을 경우(로그인 이력 존재) 유저 정보 업데이트
         else{
-            role = existData.getRole();
+            role = existData.getState().value();
             existData.setEmail(oAuth2Response.getEmail());
 
             userRepository.save(existData);

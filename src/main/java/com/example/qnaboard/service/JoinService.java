@@ -1,5 +1,6 @@
 package com.example.qnaboard.service;
 
+import com.example.qnaboard.Role;
 import com.example.qnaboard.dto.JoinDTO;
 import com.example.qnaboard.entity.User;
 import com.example.qnaboard.repository.UserRepository;
@@ -28,7 +29,7 @@ public class JoinService {
         User data = new User();
         data.setUsername(joinDTO.getUsername());
         data.setPassword(passwordEncoder.encode(joinDTO.getPassword()));
-        data.setRole("USER");
+        data.setState(Role.USER);
 
         userRepository.save(data);
     }

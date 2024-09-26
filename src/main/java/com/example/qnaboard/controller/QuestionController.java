@@ -2,10 +2,12 @@ package com.example.qnaboard.controller;
 import com.example.qnaboard.dto.AnswerForm;
 import com.example.qnaboard.dto.QuestionForm;
 import com.example.qnaboard.entity.Question;
+import com.example.qnaboard.repository.QuestionRepository;
 import com.example.qnaboard.service.QuestionService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -13,8 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.List;
 
-@RestController
 @RequestMapping("/question")
+@Controller
 public class QuestionController {
     private final QuestionService questionService;
 
@@ -23,30 +25,31 @@ public class QuestionController {
     }
 
     @GetMapping("/list")
-    public String QuestionList(Model model, @RequestParam(value = "page", defaultValue = "0") int page) {
-        Page<Question> paging = questionService.getAllQuestions(page);
-        model.addAttribute("questions", paging);
+    public String QuestionList(Model model) {
+        List<Question> questionList = questionService.getAllQuestions();
+        model.addAttribute("questionList", questionList);
         return "question_list";
     }
 
-    @GetMapping("/detail/{id}")
-    public String QuestionDetail(@PathVariable Long id, Model model, AnswerForm form) {
-        model.addAttribute("question", questionService.getQuestionById(id));
+    @GetMapping(value ="/detail/{id}")
+    public String QuestionDetail(Model model, @PathVariable("id") Long id) {
+        Question question = questionService.getQuestionById(id);
+        model.addAttribute("question", question);
         return "question_detail";
     }
 
     @GetMapping("/new")
     @PreAuthorize("isAuthenticated()")
-    public String createQuestion(QuestionForm form) {
+    public String createQuestion(QuestionForm questionForm) {
         return "question_form";
     }
 
     @PostMapping("/new")
     @PreAuthorize("isAuthenticated()")
-    public String createQuestion(@Valid QuestionForm form, BindingResult bindingResult) {
+    public String createQuestion(@Valid QuestionForm questionForm, BindingResult bindingResult) {
         if (bindingResult.hasErrors())
             return "question_form";
-        questionService.create(form.getTitle(), form.getContent());
+        questionService.create(questionForm.getTitle(), questionForm.getContent());
         return "redirect:/question/list";
     }
 
