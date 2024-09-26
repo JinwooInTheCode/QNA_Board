@@ -31,7 +31,7 @@ public class CustomUserDetailsService implements UserDetailsService {
             admin.setUsername("admin");
             admin.setPassword(passwordEncoder.encode("admin"));
             admin.setEmail("admin@example.com");
-            admin.setRole("ROLE_ADMIN");
+            admin.setRole("ADMIN");
             userRepository.save(admin);
         }
     }

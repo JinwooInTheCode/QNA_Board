@@ -10,6 +10,6 @@ import java.util.List;
 public interface QuestionRepository extends JpaRepository<Question, Long> {
     Question findByTitle(String title);
     Question findByTitleAndContent(String title, String content);
-    List<Question> findByTitleContaining(String title);
-    Page<Question> findAll(Pageable pageable);
+    List<Question> findByContentLike(String content);
+    //Page<Question> findAll(Pageable pageable);
 }

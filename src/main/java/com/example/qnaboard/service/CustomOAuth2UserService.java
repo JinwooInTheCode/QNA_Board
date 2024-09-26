@@ -56,7 +56,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             user.setUsername(nickname);
             user.setProvider(registrationId);
             user.setProviderId(providerId);
-            user.setRole("ROLE_USER");
+            user.setRole("USER");
 
             userRepository.save(user);
         }

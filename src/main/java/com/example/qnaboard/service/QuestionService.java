@@ -27,11 +27,8 @@ public class QuestionService {
         this.userRepository = userRepository;
     }
 
-    public Page<Question> getAllQuestions(int page){
-        List<Sort.Order> sort = new ArrayList<>();
-        sort.add(Sort.Order.desc("createdAt"));
-        Pageable pageable = PageRequest.of(page, 10, Sort.by(sort));
-        return questionRepository.findAll(pageable);
+    public List<Question> getAllQuestions(){
+        return questionRepository.findAll();
     }
 
     public Question getQuestionById(Long id){
@@ -75,7 +72,7 @@ public class QuestionService {
             User loggedInUser = getLoggedInUser();
 
             // 현재 로그인한 사용자가 해당 글의 작성자인지 혹은 관리자인지 확인
-            if(loggedInUser != null && (question.getAuthor().equals(loggedInUser.getUsername()) || loggedInUser.getRole().equals("ROLE_ADMIN"))) {
+            if(loggedInUser != null && (question.getAuthor().equals(loggedInUser.getUsername()) || loggedInUser.getRole().equals("ADMIN"))) {
                 question.setTitle(newTitle);
                 question.setContent(newContent);
                 question.setUpdatedAt(LocalDateTime.now());
@@ -99,7 +96,7 @@ public class QuestionService {
             User loggedInUser = getLoggedInUser();
 
             // 현재 로그인한 사용자가 해당 글의 작성자인지 혹은 관리자인지 확인
-            if(loggedInUser != null && (question.getAuthor().equals(loggedInUser.getUsername()) || loggedInUser.getRole().equals("ROLE_ADMIN"))){
+            if(loggedInUser != null && (question.getAuthor().equals(loggedInUser.getUsername()) || loggedInUser.getRole().equals("ADMIN"))){
                 questionRepository.delete(question);
             }
             else {

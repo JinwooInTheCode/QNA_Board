@@ -12,6 +12,10 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -20,6 +24,20 @@ public class SecurityConfig {
     @Bean
     PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public CorsFilter corsFilter(){
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.addAllowedOrigin("http://localhost:3000"); // 리액트
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+
+        return new CorsFilter(source);
     }
 
     private final CustomOAuth2UserService customOAuth2UserService;
@@ -39,9 +57,9 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((auth) -> auth
                         // 작동순서: 위에서 아래로 -> 즉, 아래에서 모든 권한을 다룰 수 있도록 하자.
-                        .requestMatchers("/", "/oauth2/**", "/login/**", "/loginProc", "/join", "/joinProc", "/question/**").permitAll()
+                        .requestMatchers("/", "/oauth2/**", "/login/**", "/loginProc", "/join", "/joinProc", "/question/list", "/api/test").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/my/**", "/question/new", "/question/delete/**", "/question/edit/**").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers("/my/**", "/question/**").hasAnyRole("ADMIN", "USER")
                         .anyRequest().authenticated());
         http
                 .formLogin((login) -> login.loginPage("/login")
@@ -60,6 +78,8 @@ public class SecurityConfig {
                                 userInfoEndpointConfig.userService(customOAuth2UserService)));
         http
                 .csrf((csrf) -> csrf.disable());
+        http
+                .addFilterBefore(corsFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
