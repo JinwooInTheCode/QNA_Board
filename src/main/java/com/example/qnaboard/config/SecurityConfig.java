@@ -6,6 +6,8 @@ import com.example.qnaboard.service.CustomOAuth2UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -40,6 +42,11 @@ public class SecurityConfig {
         return new CorsFilter(source);
     }
 
+    @Bean
+    AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
+
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomClientRegistrationRepo customClientRegistrationRepo;
     private final CustomOAuth2AuthorizedClientService customOAuth2AuthorizedClientService;
@@ -57,16 +64,19 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((auth) -> auth
                         // 작동순서: 위에서 아래로 -> 즉, 아래에서 모든 권한을 다룰 수 있도록 하자.
-                        .requestMatchers("/", "/oauth2/**", "/login/**", "/loginProc", "/join", "/joinProc", "/question/list", "/api/test").permitAll()
+                        .requestMatchers("/", "/oauth2/**", "/login/**", "/loginProc", "/join", "/question/list").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/my/**", "/question/**").hasAnyRole("ADMIN", "USER")
                         .anyRequest().authenticated());
         http
                 .formLogin((login) -> login.loginPage("/login")
-                        .loginProcessingUrl("/loginProc")
+                        .defaultSuccessUrl("/main") // 로그인 성공시 이동할 페이지
                         .permitAll());
         http
-                .logout((logout) -> logout.permitAll());
+                .logout((logout) -> logout.logoutUrl("/logout")
+                        .logoutSuccessUrl("/main")
+                        .invalidateHttpSession(true)
+                );
         http
                 .httpBasic((basic) -> basic.disable());
         http

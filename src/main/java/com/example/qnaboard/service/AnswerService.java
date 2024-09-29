@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class AnswerService {
@@ -23,39 +24,37 @@ public class AnswerService {
 
     // 댓글 작성
     @Transactional
-    public void add(Question question, String content) {
+    public Answer add(Question question, String content, User author){
         // 댓글을 작성할 질문을 찾는다.
 //        Question question = questionRepository.findById(questionId)
 //                .orElseThrow(() -> new IllegalArgumentException("해당 질문이 없습니다."));
         Answer answer = new Answer();
         answer.setQuestion(question);
         answer.setContent(content);
-//        answer.setAuthor(author);
+        answer.setAuthor(author);
         answer.setCreatedAt(LocalDateTime.now());
         answerRepository.save(answer);
+        return answer;
     }
+    // 댓글 조회
+    public Answer getAnswer(Long id){
+        Optional<Answer> answer = answerRepository.findById(id);
+        if(answer.isPresent())
+            return answer.get();
+        else
+            throw new IllegalStateException("해당 댓글이 없습니다.");
+    }
+
     // 댓글 수정
     @Transactional
-    public void edit(Long answerId, String newContent, User author) {
-        Answer answer = answerRepository.findById(answerId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다."));
-        // 작성자 확인
-        if(!answer.getAuthor().equals(author)){
-            throw new IllegalStateException("작성자만 수정할 수 있습니다.");
-        }
+    public void edit(Answer answer, String newContent) {
         answer.setContent(newContent);
+        answer.setCreatedAt(LocalDateTime.now());
         answerRepository.save(answer);
     }
     // 댓글 삭제
     @Transactional
-    public void delete(Long answerId, User author){
-        Answer answer = answerRepository.findById(answerId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다."));
-        // 작성자 확인
-        if(!answer.getAuthor().equals(author)){
-            throw new IllegalStateException("작성자만 삭제할 수 있습니다.");
-        }
-
+    public void delete(Answer answer){
         answerRepository.delete(answer);
     }
 }

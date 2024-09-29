@@ -9,7 +9,7 @@
 <body>
     <h1 th:text="'로그인 페이지입니다'">login page</h1>
     <hr>
-    <form th:action="@{/loginProc}" method="post" name="loginForm">
+    <form th:action="@{/login}" method="post" name="loginForm">
         <input id="username" type="text" name="username" placeholder="id"/><br>
         <input id="password" type="password" name="password" placeholder="password"/><br>
         <input type="submit" value="login"/>

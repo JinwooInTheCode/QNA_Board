@@ -1,14 +1,17 @@
 package com.example.qnaboard.service;
 
+import com.example.qnaboard.entity.Answer;
 import com.example.qnaboard.entity.Question;
 import com.example.qnaboard.entity.User;
 import com.example.qnaboard.repository.QuestionRepository;
 import com.example.qnaboard.repository.UserRepository;
+import jakarta.persistence.criteria.*;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -27,8 +30,11 @@ public class QuestionService {
         this.userRepository = userRepository;
     }
 
-    public List<Question> getAllQuestions(){
-        return questionRepository.findAll();
+    public Page<Question> getAllQuestions(int page, String keyword){
+        List<Sort.Order> sortOrders = new ArrayList<>();
+        sortOrders.add(Sort.Order.desc("createdAt"));
+        Pageable pageable = PageRequest.of(page, 10, Sort.by(sortOrders));
+        return questionRepository.findAllByKeyword(keyword, pageable);
     }
 
     public Question getQuestionById(Long id){
@@ -37,6 +43,48 @@ public class QuestionService {
             return question.get();
         else
             throw new IllegalStateException("해당 질문이 없습니다.");
+    }
+    // 글 작성
+    @Transactional
+    public void create(String title, String content, User user){
+        Question question = new Question();
+        question.setTitle(title);
+        question.setContent(content);
+        question.setAuthor(user);
+        question.setCreatedAt(LocalDateTime.now());
+        questionRepository.save(question);
+    }
+    // 글 수정
+    @Transactional
+    public void edit(Question question, String newTitle, String newContent){
+        question.setTitle(newTitle);
+        question.setContent(newContent);
+        question.setUpdatedAt(LocalDateTime.now());
+        questionRepository.save(question);
+    }
+    // 글 삭제
+    @Transactional
+    public void delete(Question question){
+        questionRepository.delete(question);
+    }
+
+    // 글 검색
+    private Specification<Question> search(String keyword){
+        return new Specification<Question>() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public Predicate toPredicate(Root<Question> q, CriteriaQuery<?> query, CriteriaBuilder cb) {
+                query.distinct(true);
+                Join<Question, User> author = q.join("author", JoinType.LEFT);
+                Join<Question, Answer> answers = q.join("answers", JoinType.LEFT);
+                Join<Answer, User> answerAuthor = answers.join("author", JoinType.LEFT);
+                return cb.or(cb.like(q.get("title"), "%" + keyword + "%"), // 제목
+                        cb.like(q.get("content"), "%" + keyword + "%"), // 내용
+                        cb.like(author.get("username"), "%" + keyword + "%"), // 질문 작성자
+                        cb.like(answers.get("content"), "%" + keyword + "%"), // 답변 내용
+                        cb.like(answerAuthor.get("username"), "%" + keyword + "%")); // 답변 작성자
+            }
+        };
     }
     private User getLoggedInUser(){
         Object principal = SecurityContextHolder.getContext()
@@ -48,66 +96,6 @@ public class QuestionService {
         }
         return null;
     }
-    // 글 작성
-    @Transactional
-    public void create(String title, String content){
-        User loggedInUser = getLoggedInUser();
-        if(loggedInUser == null){
-            throw new IllegalStateException("로그인이 필요합니다.");
-        }
-        Question question = new Question();
-        question.setTitle(title);
-        question.setContent(content);
-        question.setAuthor(loggedInUser);
-        question.setCreatedAt(LocalDateTime.now());
-        questionRepository.save(question);
-    }
-    // 글 수정
-    @Transactional
-    public void edit(Long questionId, String newTitle, String newContent){
-        Optional<Question> questionOptional = questionRepository.findById(questionId);
-
-        if(questionOptional.isPresent()){
-            Question question = questionOptional.get();
-            User loggedInUser = getLoggedInUser();
-
-            // 현재 로그인한 사용자가 해당 글의 작성자인지 혹은 관리자인지 확인
-            if(loggedInUser != null && (question.getAuthor().equals(loggedInUser.getUsername()) || loggedInUser.getState().value().equals("ROLE_ADMIN"))) {
-                question.setTitle(newTitle);
-                question.setContent(newContent);
-                question.setUpdatedAt(LocalDateTime.now());
-                questionRepository.save(question);
-            }
-            else {
-                throw new SecurityException("수정 권한이 없습니다.");
-            }
-        }
-        else {
-            throw new IllegalStateException("해당 질문이 없습니다.");
-        }
-    }
-    // 글 삭제
-    @Transactional
-    public void delete(Long questionId){
-        Optional<Question> questionOptional = questionRepository.findById(questionId);
-
-        if(questionOptional.isPresent()){
-            Question question = questionOptional.get();
-            User loggedInUser = getLoggedInUser();
-
-            // 현재 로그인한 사용자가 해당 글의 작성자인지 혹은 관리자인지 확인
-            if(loggedInUser != null && (question.getAuthor().equals(loggedInUser.getUsername()) || loggedInUser.getState().value().equals("ROLE_ADMIN"))){
-                questionRepository.delete(question);
-            }
-            else {
-                throw new SecurityException("삭제 권한이 없습니다.");
-            }
-        }
-        else {
-            throw new IllegalStateException("해당 질문이 없습니다.");
-        }
-    }
-
     public User getUserByUsername(String name) {
         return userRepository.findByUsername(name).orElse(null);
     }

@@ -2,7 +2,9 @@ package com.example.qnaboard.controller;
 import com.example.qnaboard.dto.AnswerForm;
 import com.example.qnaboard.dto.QuestionForm;
 import com.example.qnaboard.entity.Question;
+import com.example.qnaboard.entity.User;
 import com.example.qnaboard.repository.QuestionRepository;
+import com.example.qnaboard.service.JoinService;
 import com.example.qnaboard.service.QuestionService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -19,20 +21,23 @@ import java.util.List;
 @Controller
 public class QuestionController {
     private final QuestionService questionService;
+    private final JoinService joinService;
 
-    public QuestionController(QuestionService questionService) {
+    public QuestionController(QuestionService questionService, JoinService joinService) {
         this.questionService = questionService;
+        this.joinService = joinService;
     }
 
     @GetMapping("/list")
-    public String QuestionList(Model model) {
-        List<Question> questionList = questionService.getAllQuestions();
-        model.addAttribute("questionList", questionList);
+    public String QuestionList(Model model, @RequestParam(value="page", defaultValue="0") int page, @RequestParam(value="keyword", defaultValue="") String keyword){
+        Page<Question> paging = questionService.getAllQuestions(page, keyword);
+        model.addAttribute("paging", paging);
+        model.addAttribute("keyword", keyword);
         return "question_list";
     }
 
     @GetMapping(value ="/detail/{id}")
-    public String QuestionDetail(Model model, @PathVariable("id") Long id) {
+    public String QuestionDetail(Model model, @PathVariable("id") Long id, AnswerForm answerForm) {
         Question question = questionService.getQuestionById(id);
         model.addAttribute("question", question);
         return "question_detail";
@@ -46,10 +51,11 @@ public class QuestionController {
 
     @PostMapping("/new")
     @PreAuthorize("isAuthenticated()")
-    public String createQuestion(@Valid QuestionForm questionForm, BindingResult bindingResult) {
+    public String createQuestion(@Valid QuestionForm questionForm, BindingResult bindingResult, Principal principal) {
         if (bindingResult.hasErrors())
             return "question_form";
-        questionService.create(questionForm.getTitle(), questionForm.getContent());
+        User user = joinService.getUser(principal.getName());
+        questionService.create(questionForm.getTitle(), questionForm.getContent(), user);
         return "redirect:/question/list";
     }
 
@@ -57,6 +63,9 @@ public class QuestionController {
     @PreAuthorize("isAuthenticated()")
     public String editQuestion(QuestionForm questionForm, @PathVariable("id") Long id, Principal principal) {
         Question question = questionService.getQuestionById(id);
+        if (!question.getAuthor().getUsername().equals(principal.getName())) {
+            throw new SecurityException("본인이 작성한 글만 수정할 수 있습니다.");
+        }
         questionForm.setTitle(question.getTitle());
         questionForm.setContent(question.getContent());
         return "question_form";
@@ -72,8 +81,8 @@ public class QuestionController {
         if (!question.getAuthor().getUsername().equals(principal.getName())) {
             throw new SecurityException("본인이 작성한 글만 수정할 수 있습니다.");
         }
-        questionService.edit(id, questionForm.getTitle(), questionForm.getContent());
-        return "redirect:/question/detail/" + id;
+        questionService.edit(question, questionForm.getTitle(), questionForm.getContent());
+        return "redirect:/question/detail/%s" + id;
     }
 
     @GetMapping("/delete/{id}")
@@ -83,7 +92,7 @@ public class QuestionController {
         if (!question.getAuthor().getUsername().equals(principal.getName())) {
             throw new SecurityException("본인이 작성한 글만 삭제할 수 있습니다.");
         }
-        questionService.delete(id);
-        return "redirect:/question";
+        questionService.delete(question);
+        return "redirect:/question_list";
     }
 }
