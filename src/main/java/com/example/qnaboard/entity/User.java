@@ -11,7 +11,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@RequiredArgsConstructor
 @Table(name = "USER_TABLE")
 public class User {
     @Id
@@ -20,9 +19,10 @@ public class User {
     @Column(unique = true)
     private String username;
     private String password;
+    @Column(unique = true)
     private String email;
     @Enumerated(EnumType.STRING)
-    private Role state;
+    private Role role;
     private String provider;
     private String providerId;
     private String refreshToken;

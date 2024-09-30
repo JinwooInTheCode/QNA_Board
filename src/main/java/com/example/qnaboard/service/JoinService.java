@@ -23,7 +23,7 @@ public class JoinService {
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(password));
         user.setEmail(email);
-        user.setState(Role.USER);
+        user.setRole(Role.USER);
 
         userRepository.save(user);
         return user;

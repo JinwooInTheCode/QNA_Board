@@ -1,17 +1,15 @@
 package com.example.qnaboard;
 
-public enum Role {
-    GUEST("GUEST"),
-    USER("USER"),
-    ADMIN("ADMIN");
+import lombok.Getter;
 
-    private String role;
+@Getter
+public enum Role {
+    GUEST("ROLE_GUEST"),
+    USER("ROLE_USER"),
+    ADMIN("ROLE_ADMIN");
 
     Role(String role) {
         this.role = role;
     }
-
-    public String value() {
-        return role;
-    }
+    private String role;
 }

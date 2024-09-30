@@ -36,7 +36,7 @@ public class CustomUserDetailsService implements UserDetailsService {
             admin.setUsername("admin");
             admin.setPassword(passwordEncoder.encode("admin"));
             admin.setEmail("admin@example.com");
-            admin.setState(Role.ADMIN);
+            admin.setRole(Role.ADMIN);
             userRepository.save(admin);
         }
     }
@@ -50,13 +50,10 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userOptional.get();
         List<GrantedAuthority> authorities = new ArrayList<>();
         if("admin".equals(username)) {
-            authorities.add(new SimpleGrantedAuthority(Role.ADMIN.value()));
+            authorities.add(new SimpleGrantedAuthority(Role.ADMIN.getRole()));
         } else {
-            authorities.add(new SimpleGrantedAuthority(Role.USER.value()));
+            authorities.add(new SimpleGrantedAuthority(Role.USER.getRole()));
         }
-        return withUsername(user.getUsername())
-                .password(user.getPassword())
-                .roles(user.getState().value())
-                .build();
+        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), authorities);
     }
 }

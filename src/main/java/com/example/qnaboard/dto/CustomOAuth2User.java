@@ -1,5 +1,6 @@
 package com.example.qnaboard.dto;
 
+import com.example.qnaboard.Role;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
@@ -10,9 +11,9 @@ import java.util.Map;
 public class CustomOAuth2User implements OAuth2User {
 
     private final OAuth2Response oAuth2Response;
-    private final String role;
+    private final Role role;
 
-    public CustomOAuth2User(OAuth2Response oAuth2Response, String role){
+    public CustomOAuth2User(OAuth2Response oAuth2Response, Role role){
         this.oAuth2Response = oAuth2Response;
         this.role = role;
     }
@@ -30,7 +31,7 @@ public class CustomOAuth2User implements OAuth2User {
             @Override
             public String getAuthority() {
 
-                return role;
+                return role.toString();
             }
         });
         return collection;

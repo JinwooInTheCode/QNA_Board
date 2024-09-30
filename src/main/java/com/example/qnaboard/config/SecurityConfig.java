@@ -64,16 +64,16 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((auth) -> auth
                         // 작동순서: 위에서 아래로 -> 즉, 아래에서 모든 권한을 다룰 수 있도록 하자.
-                        .requestMatchers("/", "/oauth2/**", "/login/**", "/loginProc", "/join", "/question/list").permitAll()
+                        .requestMatchers("/", "/oauth2/**", "/user/login/**", "/loginProc", "/user/join", "/question/list").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/my/**", "/question/**").hasAnyRole("ADMIN", "USER")
                         .anyRequest().authenticated());
         http
-                .formLogin((login) -> login.loginPage("/login")
+                .formLogin((login) -> login.loginPage("/user/login")
                         .defaultSuccessUrl("/main") // 로그인 성공시 이동할 페이지
                         .permitAll());
         http
-                .logout((logout) -> logout.logoutUrl("/logout")
+                .logout((logout) -> logout.logoutUrl("/user/logout")
                         .logoutSuccessUrl("/main")
                         .invalidateHttpSession(true)
                 );
@@ -81,7 +81,7 @@ public class SecurityConfig {
                 .httpBasic((basic) -> basic.disable());
         http
                 .oauth2Login((oauth2) -> oauth2
-                        .loginPage("/login")
+                        .loginPage("/user/login")
                         .clientRegistrationRepository(customClientRegistrationRepo.clientRegistrationRepository())
                         .authorizedClientService(customOAuth2AuthorizedClientService.oAuth2AuthorizedClientService(jdbcTemplate, customClientRegistrationRepo.clientRegistrationRepository()))
                         .userInfoEndpoint((userInfoEndpointConfig) ->

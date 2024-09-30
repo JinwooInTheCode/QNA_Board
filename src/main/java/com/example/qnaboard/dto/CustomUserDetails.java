@@ -1,28 +1,37 @@
 package com.example.qnaboard.dto;
 
+import com.example.qnaboard.Role;
 import com.example.qnaboard.entity.User;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class CustomUserDetails implements UserDetails {
     private User user;
     public CustomUserDetails(User user){
         this.user = user;
     }
+    private GrantedAuthority getAuthority(Role role){
+        return new SimpleGrantedAuthority("ROLE_" + role);
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Collection<GrantedAuthority> collection = new ArrayList<>();
-        collection.add(new GrantedAuthority() {
-            @Override
-            public String getAuthority() {
-                return user.getState().value();
-            }
-        });
-        return collection;
+        List<GrantedAuthority> authorityList = new ArrayList<>();
+
+        switch (user.getRole()){
+            case ADMIN:
+                authorityList.add(getAuthority(Role.ADMIN));
+            case USER:
+                authorityList.add(getAuthority(Role.USER));
+            case GUEST:
+                authorityList.add(getAuthority(Role.GUEST));
+        }
+        return authorityList;
     }
 
     @Override

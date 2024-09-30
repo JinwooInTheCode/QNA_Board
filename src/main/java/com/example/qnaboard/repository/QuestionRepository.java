@@ -23,7 +23,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
             + "left outer join Answer a on a.question = q "
             + "left outer join User u2 on a.author = u2 "
             + "where "
-            + "   q.subject like %:keyword% "
+            + "   q.title like %:keyword% "
             + "   or q.content like %:keyword% "
             + "   or u1.username like %:keyword% "
             + "   or a.content like %:keyword% "

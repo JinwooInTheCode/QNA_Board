@@ -48,7 +48,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         User existData = userRepository.findByProviderId(providerId);
 
-        String role = null;
+        Role role = null;
 
         // 유저 정보가 없을 경우(처음 로그인) 유저 정보 추가
         if(existData == null){
@@ -57,13 +57,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             user.setUsername(nickname);
             user.setProvider(registrationId);
             user.setProviderId(providerId);
-            user.setState(Role.USER);
+            user.setRole(Role.USER);
 
             userRepository.save(user);
         }
         // 유저 정보가 있을 경우(로그인 이력 존재) 유저 정보 업데이트
         else{
-            role = existData.getState().value();
+            role = existData.getRole();
             existData.setEmail(oAuth2Response.getEmail());
 
             userRepository.save(existData);
