@@ -15,31 +15,19 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.context.SecurityContextPersistenceFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebSecurity(debug = true)
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
     @Bean
     PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public CorsFilter corsFilter(){
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        config.addAllowedOrigin("http://localhost:3000"); // 리액트
-        config.addAllowedHeader("*");
-        config.addAllowedMethod("*");
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-
-        return new CorsFilter(source);
     }
 
     @Bean
@@ -62,15 +50,29 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         http
+                .addFilterBefore(corsFilter(), SecurityContextPersistenceFilter.class);
+        http
                 .authorizeHttpRequests((auth) -> auth
                         // 작동순서: 위에서 아래로 -> 즉, 아래에서 모든 권한을 다룰 수 있도록 하자.
-                        .requestMatchers("/", "/oauth2/**", "/user/login/**", "/loginProc", "/user/join", "/question/list").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/my/**", "/question/**").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(new AntPathRequestMatcher("/")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/oauth2/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/user/login/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/loginProc")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/user/join")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/question/list")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/admin/**")).hasRole("ADMIN")
+                        .requestMatchers(new AntPathRequestMatcher("/my/**")).hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(new AntPathRequestMatcher("/question/**")).hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll() // H2 콘솔 접근 허용
                         .anyRequest().authenticated());
         http
                 .formLogin((login) -> login.loginPage("/user/login")
                         .defaultSuccessUrl("/main") // 로그인 성공시 이동할 페이지
+                        .failureHandler((request, response, exception) -> {
+                            // 로그인 실패 시 로그 출력
+                            System.err.println("Login failed: " + exception.getMessage());
+                            response.sendRedirect("/user/login?error");
+                        })
                         .permitAll());
         http
                 .logout((logout) -> logout.logoutUrl("/user/logout")
@@ -89,8 +91,23 @@ public class SecurityConfig {
         http
                 .csrf((csrf) -> csrf.disable());
         http
-                .addFilterBefore(corsFilter(), UsernamePasswordAuthenticationFilter.class);
+                .csrf(csrf -> csrf.ignoringRequestMatchers(new AntPathRequestMatcher("/h2-console/**"))) // H2 콘솔 사용 시 CSRF 비활성화
+                .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin())); // H2 콘솔 프레임 허용
 
         return http.build();
+    }
+
+    @Bean
+    public CorsFilter corsFilter(){
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.addAllowedOrigin("http://localhost:3000"); // 리액트
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+
+        return new CorsFilter(source);
     }
 }
