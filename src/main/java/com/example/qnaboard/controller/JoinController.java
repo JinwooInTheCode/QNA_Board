@@ -22,18 +22,18 @@ public class JoinController {
 
     @GetMapping("/join")
     public String join(JoinForm joinForm){
-        return "join";
+        return "join_form";
     }
     @PostMapping("/join")
     public String join(@Valid JoinForm joinForm, BindingResult bindingResult){
         if (bindingResult.hasErrors()) {
-            return "join";
+            return "join_form";
         }
 
         if (!joinForm.getPassword().equals(joinForm.getPasswordRepeated())) {
             bindingResult.rejectValue("passwordRepeated", "passwordInCorrect",
                     "2개의 패스워드가 일치하지 않습니다.");
-            return "join";
+            return "join_form";
         }
 
         try {
@@ -41,14 +41,12 @@ public class JoinController {
                     joinForm.getEmail(), joinForm.getPassword());
         } catch (DataIntegrityViolationException e) {
             e.printStackTrace();
-            bindingResult.reject("signupError",
-                    "이미 등록된 사용자 ID입니다.");
-            return "join";
+            bindingResult.reject("signupError", "이미 등록된 사용자 ID입니다.");
+            return "join_form";
         } catch (Exception e) {
             e.printStackTrace();
-            bindingResult.reject("signupError",
-                    e.getMessage());
-            return "join";
+            bindingResult.reject("signupError", e.getMessage());
+            return "join_form";
         }
         return "redirect:/";
     }

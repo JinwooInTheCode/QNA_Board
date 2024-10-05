@@ -34,7 +34,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         if(!userRepository.existsByUsername("admin")){
             User admin = new User();
             admin.setUsername("admin");
-            admin.setPassword(passwordEncoder.encode("admin"));
+            admin.setPassword("admin");
+//            admin.setPassword(passwordEncoder.encode("admin"));
             admin.setEmail("admin@example.com");
             admin.setRole(Role.ADMIN);
             userRepository.save(admin);

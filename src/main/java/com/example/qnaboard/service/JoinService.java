@@ -3,6 +3,7 @@ package com.example.qnaboard.service;
 import com.example.qnaboard.Role;
 import com.example.qnaboard.entity.User;
 import com.example.qnaboard.repository.UserRepository;
+import jakarta.validation.Valid;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,11 +19,12 @@ public class JoinService {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
-    public User joinProcess(String username, String password, String email){
+    public User joinProcess(String username, String email, String password){
         User user = new User();
         user.setUsername(username);
-        user.setPassword(passwordEncoder.encode(password));
         user.setEmail(email);
+        user.setPassword(password);
+//        user.setPassword(passwordEncoder.encode(password));
         user.setRole(Role.USER);
 
         userRepository.save(user);
