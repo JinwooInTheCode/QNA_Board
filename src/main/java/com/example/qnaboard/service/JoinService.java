@@ -23,8 +23,7 @@ public class JoinService {
         User user = new User();
         user.setUsername(username);
         user.setEmail(email);
-        user.setPassword(password);
-//        user.setPassword(passwordEncoder.encode(password));
+        user.setPassword(passwordEncoder.encode(password));
         user.setRole(Role.USER);
 
         userRepository.save(user);

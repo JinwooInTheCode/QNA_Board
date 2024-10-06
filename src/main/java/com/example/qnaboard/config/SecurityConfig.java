@@ -10,10 +10,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -22,7 +24,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 @Configuration
-@EnableWebSecurity(debug = true)
+@EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
     @Bean
@@ -59,6 +61,9 @@ public class SecurityConfig {
                         .requestMatchers(new AntPathRequestMatcher("/user/login/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/loginProc")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/user/join")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/css/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/js/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/img/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/question/list")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/admin/**")).hasRole("ADMIN")
                         .requestMatchers(new AntPathRequestMatcher("/my/**")).hasAnyRole("ADMIN", "USER")
@@ -67,12 +72,9 @@ public class SecurityConfig {
                         .anyRequest().authenticated());
         http
                 .formLogin((login) -> login.loginPage("/user/login")
-                        .defaultSuccessUrl("/main") // 로그인 성공시 이동할 페이지
-                        .failureHandler((request, response, exception) -> {
-                            // 로그인 실패 시 로그 출력
-                            System.err.println("Login failed: " + exception.getMessage());
-                            response.sendRedirect("/user/login?error");
-                        })
+                        .loginProcessingUrl("/loginProc")
+                        .defaultSuccessUrl("/main", true) // 로그인 성공시 이동할 페이지
+                        .failureHandler(authenticationFailureHandler())
                         .permitAll());
         http
                 .logout((logout) -> logout.logoutUrl("/user/logout")
@@ -84,17 +86,22 @@ public class SecurityConfig {
         http
                 .oauth2Login((oauth2) -> oauth2
                         .loginPage("/user/login")
+                        .defaultSuccessUrl("/main", true) // 로그인 성공시 이동할 페이지
                         .clientRegistrationRepository(customClientRegistrationRepo.clientRegistrationRepository())
                         .authorizedClientService(customOAuth2AuthorizedClientService.oAuth2AuthorizedClientService(jdbcTemplate, customClientRegistrationRepo.clientRegistrationRepository()))
                         .userInfoEndpoint((userInfoEndpointConfig) ->
                                 userInfoEndpointConfig.userService(customOAuth2UserService)));
         http
                 .csrf((csrf) -> csrf.disable());
-        http
-                .csrf(csrf -> csrf.ignoringRequestMatchers(new AntPathRequestMatcher("/h2-console/**"))) // H2 콘솔 사용 시 CSRF 비활성화
-                .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin())); // H2 콘솔 프레임 허용
+//        http
+//                .csrf(csrf -> csrf.ignoringRequestMatchers(new AntPathRequestMatcher("/h2-console/**"))) // H2 콘솔 사용 시 CSRF 비활성화
+//                .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin())); // H2 콘솔 프레임 허용
 
         return http.build();
+    }
+
+    public void configure(WebSecurity web) throws Exception {
+        web.ignoring().requestMatchers("/css/**", "/js/**", "/img/**", "/error");
     }
 
     @Bean
@@ -109,5 +116,13 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", config);
 
         return new CorsFilter(source);
+    }
+
+    @Bean
+    public AuthenticationFailureHandler authenticationFailureHandler(){
+        return (request, response, exception) -> {
+            System.err.println("Login failed: " + exception.getMessage());
+            response.sendRedirect("/user/login?error");
+        };
     }
 }

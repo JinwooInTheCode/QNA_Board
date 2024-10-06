@@ -34,7 +34,11 @@ public class QuestionService {
         List<Sort.Order> sortOrders = new ArrayList<>();
         sortOrders.add(Sort.Order.desc("createdAt"));
         Pageable pageable = PageRequest.of(page, 10, Sort.by(sortOrders));
-        return questionRepository.findAllByKeyword(keyword, pageable);
+
+        if(keyword == null || keyword.isEmpty())
+            return questionRepository.findAll(pageable);
+        else
+            return questionRepository.findAllByKeyword(keyword, pageable);
     }
 
     public Question getQuestionById(Long id){

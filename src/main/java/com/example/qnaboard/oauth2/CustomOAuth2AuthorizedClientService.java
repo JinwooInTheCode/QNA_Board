@@ -7,10 +7,12 @@ import org.springframework.security.oauth2.client.JdbcOAuth2AuthorizedClientServ
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 
+import javax.sql.DataSource;
+
 @Configuration
 public class CustomOAuth2AuthorizedClientService {
     @Bean
     public OAuth2AuthorizedClientService oAuth2AuthorizedClientService(JdbcTemplate jdbcTemplate, ClientRegistrationRepository clientRegistrationRepository){
-        return new JdbcOAuth2AuthorizedClientService(jdbcTemplate ,clientRegistrationRepository);
+        return new JdbcOAuth2AuthorizedClientService(jdbcTemplate, clientRegistrationRepository);
     }
 }

@@ -8,11 +8,14 @@ import com.example.qnaboard.service.JoinService;
 import com.example.qnaboard.service.QuestionService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
 import java.util.List;
@@ -64,7 +67,7 @@ public class QuestionController {
     public String editQuestion(QuestionForm questionForm, @PathVariable("id") Long id, Principal principal) {
         Question question = questionService.getQuestionById(id);
         if (!question.getAuthor().getUsername().equals(principal.getName())) {
-            throw new SecurityException("본인이 작성한 글만 수정할 수 있습니다.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"본인이 작성한 글만 수정할 수 있습니다.");
         }
         questionForm.setTitle(question.getTitle());
         questionForm.setContent(question.getContent());
@@ -82,7 +85,7 @@ public class QuestionController {
             throw new SecurityException("본인이 작성한 글만 수정할 수 있습니다.");
         }
         questionService.edit(question, questionForm.getTitle(), questionForm.getContent());
-        return "redirect:/question/detail/%s" + id;
+        return String.format("redirect:/question/detail/%s", id);
     }
 
     @GetMapping("/delete/{id}")
@@ -90,7 +93,7 @@ public class QuestionController {
     public String deleteQuestion(@PathVariable Long id, Principal principal) {
         Question question = questionService.getQuestionById(id);
         if (!question.getAuthor().getUsername().equals(principal.getName())) {
-            throw new SecurityException("본인이 작성한 글만 삭제할 수 있습니다.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"본인이 작성한 글만 삭제할 수 있습니다.");
         }
         questionService.delete(question);
         return "redirect:/question_list";
