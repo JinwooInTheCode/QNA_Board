@@ -23,7 +23,6 @@ public class AnswerService {
     }
 
     // 댓글 작성
-    @Transactional
     public Answer add(Question question, String content, User author){
         // 댓글을 작성할 질문을 찾는다.
 //        Question question = questionRepository.findById(questionId)
@@ -46,14 +45,12 @@ public class AnswerService {
     }
 
     // 댓글 수정
-    @Transactional
     public void edit(Answer answer, String newContent) {
         answer.setContent(newContent);
         answer.setCreatedAt(LocalDateTime.now());
         answerRepository.save(answer);
     }
     // 댓글 삭제
-    @Transactional
     public void delete(Answer answer){
         answerRepository.delete(answer);
     }

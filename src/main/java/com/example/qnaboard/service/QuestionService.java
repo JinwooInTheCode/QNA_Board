@@ -49,7 +49,6 @@ public class QuestionService {
             throw new IllegalStateException("해당 질문이 없습니다.");
     }
     // 글 작성
-    @Transactional
     public void create(String title, String content, User user){
         Question question = new Question();
         question.setTitle(title);
@@ -59,7 +58,6 @@ public class QuestionService {
         questionRepository.save(question);
     }
     // 글 수정
-    @Transactional
     public void edit(Question question, String newTitle, String newContent){
         question.setTitle(newTitle);
         question.setContent(newContent);
@@ -67,7 +65,6 @@ public class QuestionService {
         questionRepository.save(question);
     }
     // 글 삭제
-    @Transactional
     public void delete(Question question){
         questionRepository.delete(question);
     }
@@ -90,17 +87,17 @@ public class QuestionService {
             }
         };
     }
-    private User getLoggedInUser(){
-        Object principal = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
-        if(principal instanceof UserDetails){
-            String username = ((UserDetails) principal).getUsername();
-            return userRepository.findByUsername(username).orElse(null);
-        }
-        return null;
-    }
-    public User getUserByUsername(String name) {
-        return userRepository.findByUsername(name).orElse(null);
-    }
+//    private User getLoggedInUser(){
+//        Object principal = SecurityContextHolder.getContext()
+//                .getAuthentication()
+//                .getPrincipal();
+//        if(principal instanceof UserDetails){
+//            String username = ((UserDetails) principal).getUsername();
+//            return userRepository.findByUsername(username).orElse(null);
+//        }
+//        return null;
+//    }
+//    public User getUserByUsername(String name) {
+//        return userRepository.findByUsername(name).orElse(null);
+//    }
 }

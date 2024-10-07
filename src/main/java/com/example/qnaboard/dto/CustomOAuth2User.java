@@ -16,6 +16,7 @@ public class CustomOAuth2User implements OAuth2User {
     public CustomOAuth2User(OAuth2Response oAuth2Response, Role role){
         this.oAuth2Response = oAuth2Response;
         this.role = role;
+//        this.role = role != null ? role : Role.USER; // Null이면 기본 값 설정
     }
     @Override
     public Map<String, Object> getAttributes() {
