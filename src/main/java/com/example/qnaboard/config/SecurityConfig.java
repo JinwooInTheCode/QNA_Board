@@ -65,6 +65,7 @@ public class SecurityConfig {
                         .requestMatchers(new AntPathRequestMatcher("/css/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/js/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/img/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/mail/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/question/list")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/admin/**")).hasRole("ADMIN")
                         .requestMatchers(new AntPathRequestMatcher("/my/**")).hasAnyRole("ADMIN", "USER")
@@ -75,7 +76,7 @@ public class SecurityConfig {
                 .formLogin((login) -> login.loginPage("/user/login")
                         .loginProcessingUrl("/loginProc")
                         .defaultSuccessUrl("/main", true) // 로그인 성공시 이동할 페이지
-                        .failureHandler(authenticationFailureHandler())
+//                        .failureHandler(authenticationFailureHandler())
                         .permitAll());
         http
                 .logout((logout) -> logout.logoutRequestMatcher(new AntPathRequestMatcher("/user/logout"))
@@ -94,6 +95,8 @@ public class SecurityConfig {
                                 userInfoEndpointConfig.userService(customOAuth2UserService)));
         http
                 .csrf(csrf -> csrf.ignoringRequestMatchers(new AntPathRequestMatcher("/h2-console/**"))) // H2 콘솔 사용 시 CSRF 비활성화
+                .csrf(csrf -> csrf.ignoringRequestMatchers(new AntPathRequestMatcher("/oauth2/**"))) // OAuth2 사용 시 CSRF 비활성화
+                .csrf(csrf -> csrf.ignoringRequestMatchers(new AntPathRequestMatcher("/mail/**"))) // 이메일 인증 시 CSRF 비활성화
                 .headers((headers) -> headers
                         .addHeaderWriter(new XFrameOptionsHeaderWriter(
                                 XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN)));
@@ -119,11 +122,11 @@ public class SecurityConfig {
         return new CorsFilter(source);
     }
 
-    @Bean
-    public AuthenticationFailureHandler authenticationFailureHandler(){
-        return (request, response, exception) -> {
-            System.err.println("Login failed: " + exception.getMessage());
-            response.sendRedirect("/user/login?error");
-        };
-    }
+//    @Bean
+//    public AuthenticationFailureHandler authenticationFailureHandler(){
+//        return (request, response, exception) -> {
+//            System.err.println("Login failed: " + exception.getMessage());
+//            response.sendRedirect("/user/login?error");
+//        };
+//    }
 }
