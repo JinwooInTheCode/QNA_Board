@@ -1,6 +1,7 @@
 package com.example.qnaboard.repository;
 
 import com.example.qnaboard.entity.Question;
+import com.example.qnaboard.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -13,7 +14,8 @@ import java.util.List;
 public interface QuestionRepository extends JpaRepository<Question, Long> {
     Question findByTitle(String title);
     Question findByTitleAndContent(String title, String content);
-    List<Question> findByContentLike(String content);
+    List<Question> findByTitleLike(String title);
+    Page<Question> findByAuthor(User author, Pageable pageable);
     Page<Question> findAll(Pageable pageable);
     Page<Question> findAll(Specification<Question> spec, Pageable pageable);
     @Query("SELECT "

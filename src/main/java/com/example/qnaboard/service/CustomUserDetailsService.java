@@ -31,7 +31,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @PostConstruct
     public void init(){
         // admin 계정 생성
-        if(!userRepository.existsByUsername("admin")){
+        if(!userRepository.existsByEmail("admin@example.com")){
             User admin = new User();
             admin.setUsername("admin");
             admin.setPassword(passwordEncoder.encode("admin"));

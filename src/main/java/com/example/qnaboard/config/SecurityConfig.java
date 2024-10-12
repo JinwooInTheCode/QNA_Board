@@ -75,8 +75,8 @@ public class SecurityConfig {
         http
                 .formLogin((login) -> login.loginPage("/user/login")
                         .loginProcessingUrl("/loginProc")
+                        .usernameParameter("email")
                         .defaultSuccessUrl("/main", true) // 로그인 성공시 이동할 페이지
-//                        .failureHandler(authenticationFailureHandler())
                         .permitAll());
         http
                 .logout((logout) -> logout.logoutRequestMatcher(new AntPathRequestMatcher("/user/logout"))
@@ -121,12 +121,4 @@ public class SecurityConfig {
 
         return new CorsFilter(source);
     }
-
-//    @Bean
-//    public AuthenticationFailureHandler authenticationFailureHandler(){
-//        return (request, response, exception) -> {
-//            System.err.println("Login failed: " + exception.getMessage());
-//            response.sendRedirect("/user/login?error");
-//        };
-//    }
 }
