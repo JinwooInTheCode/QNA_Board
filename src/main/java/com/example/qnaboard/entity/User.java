@@ -20,9 +20,11 @@ public class User {
 
     @Column(unique = true)
     private String email;
-
+    // 회원 닉네임
     @Column(unique = true)
     private String username;
+    // 회원 본명
+    private String name;
 
     private String password;
 

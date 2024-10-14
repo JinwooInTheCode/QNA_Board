@@ -44,7 +44,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // 구현
         String providerId = oAuth2Response.getProvider()+"_"+oAuth2Response.getProviderId();
         String email = oAuth2Response.getEmail();
-        String nickname = oAuth2Response.getName();
+        String name = oAuth2Response.getName();
 
         User existData = userRepository.findByProviderId(providerId);
 
@@ -54,7 +54,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         if(existData == null){
             User user = new User();
             user.setEmail(email);
-            user.setUsername(nickname);
+            user.setName(name);
             user.setProvider(registrationId);
             user.setProviderId(providerId);
             user.setRole(Role.USER);
