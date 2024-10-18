@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +40,13 @@ public class QuestionService {
             return questionRepository.findAll(pageable);
         else
             return questionRepository.findAllByKeyword(keyword, pageable);
+    }
+
+    public Page<Question> getAllQuestionsByAuthor(int page, User author){
+        List<Sort.Order> sortOrders = new ArrayList<>();
+        sortOrders.add(Sort.Order.desc("createdAt"));
+        Pageable pageable = PageRequest.of(page, 10, Sort.by(sortOrders));
+        return questionRepository.findByAuthor(author, pageable);
     }
 
     public Question getQuestionById(Long id){
@@ -87,17 +95,4 @@ public class QuestionService {
             }
         };
     }
-//    private User getLoggedInUser(){
-//        Object principal = SecurityContextHolder.getContext()
-//                .getAuthentication()
-//                .getPrincipal();
-//        if(principal instanceof UserDetails){
-//            String username = ((UserDetails) principal).getUsername();
-//            return userRepository.findByUsername(username).orElse(null);
-//        }
-//        return null;
-//    }
-//    public User getUserByUsername(String name) {
-//        return userRepository.findByUsername(name).orElse(null);
-//    }
 }

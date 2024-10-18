@@ -6,10 +6,16 @@ import com.example.qnaboard.entity.User;
 import com.example.qnaboard.repository.AnswerRepository;
 import com.example.qnaboard.repository.QuestionRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -20,6 +26,20 @@ public class AnswerService {
     public AnswerService(AnswerRepository answerRepository, QuestionRepository questionRepository){
         this.answerRepository = answerRepository;
         this.questionRepository = questionRepository;
+    }
+
+    public Page<Answer> getAllAnswers(Question question, int page){
+        List<Sort.Order> sortOrders = new ArrayList<>();
+        sortOrders.add(Sort.Order.desc("createdAt"));
+        Pageable pageable = PageRequest.of(page, 5, Sort.by(sortOrders));
+        return answerRepository.findByQuestionId(question, pageable);
+    }
+
+    public Page<Answer> getAllAnswersByAuthor(int page, User author){
+        List<Sort.Order> sortOrders = new ArrayList<>();
+        sortOrders.add(Sort.Order.desc("createdAt"));
+        Pageable pageable = PageRequest.of(page, 5, Sort.by(sortOrders));
+        return answerRepository.findByAuthor(author, pageable);
     }
 
     // 댓글 작성

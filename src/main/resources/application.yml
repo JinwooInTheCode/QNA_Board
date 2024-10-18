@@ -14,7 +14,7 @@ spring:
       org.springframework: debug
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     properties:
@@ -26,7 +26,8 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: cadam9601028@gmail.com
-    password: bthu bgqg rkeh urxb
+    # 앱 비밀번호 새로 생성
+    password:
     properties:
       mail:
         smtp:

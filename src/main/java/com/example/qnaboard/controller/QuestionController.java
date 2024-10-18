@@ -1,9 +1,11 @@
 package com.example.qnaboard.controller;
 import com.example.qnaboard.dto.AnswerForm;
 import com.example.qnaboard.dto.QuestionForm;
+import com.example.qnaboard.entity.Answer;
 import com.example.qnaboard.entity.Question;
 import com.example.qnaboard.entity.User;
 import com.example.qnaboard.repository.QuestionRepository;
+import com.example.qnaboard.service.AnswerService;
 import com.example.qnaboard.service.JoinService;
 import com.example.qnaboard.service.QuestionService;
 import jakarta.validation.Valid;
@@ -24,11 +26,13 @@ import java.util.List;
 @Controller
 public class QuestionController {
     private final QuestionService questionService;
+    private final AnswerService answerService;
     private final JoinService joinService;
 
-    public QuestionController(QuestionService questionService, JoinService joinService) {
+    public QuestionController(QuestionService questionService, JoinService joinService, AnswerService answerService) {
         this.questionService = questionService;
         this.joinService = joinService;
+        this.answerService = answerService;
     }
 
     @GetMapping("/list")
@@ -40,9 +44,12 @@ public class QuestionController {
     }
 
     @GetMapping(value ="/detail/{id}")
-    public String QuestionDetail(Model model, @PathVariable("id") Long id, AnswerForm answerForm) {
+    public String QuestionDetail(Model model, @PathVariable("id") Long id, AnswerForm answerForm,
+                                 @RequestParam(value="ans-page", defaultValue="0") int answerPage) {
         Question question = questionService.getQuestionById(id);
+        Page<Answer> answerPaging = answerService.getAllAnswers(question, answerPage);
         model.addAttribute("question", question);
+        model.addAttribute("answerPaging", answerPaging);
         return "question_detail";
     }
 
