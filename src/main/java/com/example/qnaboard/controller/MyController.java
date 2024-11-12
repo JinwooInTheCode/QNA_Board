@@ -5,7 +5,6 @@ import com.example.qnaboard.entity.Answer;
 import com.example.qnaboard.entity.Question;
 import com.example.qnaboard.entity.User;
 import com.example.qnaboard.service.AnswerService;
-import com.example.qnaboard.service.JoinService;
 import com.example.qnaboard.service.MyService;
 import com.example.qnaboard.service.QuestionService;
 import jakarta.validation.Valid;
@@ -35,7 +34,8 @@ public class MyController {
     }
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/my")
-    public String my(UserUpdateForm form, @RequestParam(value="question-page", defaultValue="0") int questionPage,
+    public String my(UserUpdateForm form,
+                     @RequestParam(value="question-page", defaultValue="0") int questionPage,
                      @RequestParam(value="answer-page", defaultValue="0") int answerPage,
                      Principal principal, Model model){
         User user = myService.getUserByUsername(principal.getName());
@@ -50,7 +50,7 @@ public class MyController {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @GetMapping("/my")
+    @PostMapping("/my")
     public String update(@Valid UserUpdateForm form, BindingResult bindingResult, Principal principal,
                          Model model){
         User user = myService.getUserByUsername(principal.getName());

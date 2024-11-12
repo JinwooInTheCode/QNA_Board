@@ -45,7 +45,7 @@ public class QuestionController {
 
     @GetMapping(value ="/detail/{id}")
     public String QuestionDetail(Model model, @PathVariable("id") Long id, AnswerForm answerForm,
-                                 @RequestParam(value="ans-page", defaultValue="0") int answerPage) {
+                                 @RequestParam(value="answer-page", defaultValue="0") int answerPage) {
         Question question = questionService.getQuestionById(id);
         Page<Answer> answerPaging = answerService.getAllAnswers(question, answerPage);
         model.addAttribute("question", question);

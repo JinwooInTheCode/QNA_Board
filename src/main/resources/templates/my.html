@@ -1,12 +1,153 @@
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, 1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>내정보</title>
-</head>
-<body>
-    <h1 th:text="'내 정보 페이지입니다'">my page</h1>
-</body>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" layout:decorate="~{layout}">
+<div layout:fragment="content" class="container my-3">
+    <h2 class="border-bottom py-2" >내 정보</h2>
+    <div class="card my-3">
+        <div class="card-body">
+            <form th:action="@{/user/my}" th:object="${form}" method="post">
+                <div class="mb-3">
+                    <label for="username" class="form-label">사용자 닉네임</label>
+                    <input type="text" id="username" th:value="${username}" class="form-control" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">이메일</label>
+                    <input type="email" id="email" th:value="${email}" class="form-control" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="originalPassword" class="form-label">기존 비밀번호</label>
+                    <input type="password" id="originalPassword" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="newPassword" class="form-label">새 비밀번호</label>
+                    <input type="password" id="newPassword" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="newPasswordCheck" class="form-label">새 비밀번호 확인</label>
+                    <input type="password" id="newPasswordCheck" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary">정보 저장</button>
+            </form>
+        </div>
+    </div>
+
+    <h2 class="border-bottom py-2" >내 질문</h2>
+    <div class="card my-3">
+        <table class="table">
+            <thead class="table-dark">
+            <tr class="text-center">
+                <th>번호</th>
+                <th style="width:50%">제목</th>
+                <th>글쓴이</th>
+                <th>작성일시</th>
+                <th>조회수</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr class="text-center" th:each="question, loop : ${wroteQuestions}">
+                    <td th:text="${question.id}"></td>
+                    <td class="text-start">
+                        <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.title}"></a>
+                        <span class="text-danger small ms-2"
+                              th:if="${#lists.size(question.answers) > 0}"
+                              th:text="${#lists.size(question.answers)}">
+                            </span>
+                    </td>
+                    <td><span th:if="${question.author != null}" th:text="${question.author.username}"></span></td>
+                    <td th:text="${#temporals.format(question.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                </tr>
+            </tbody>
+        </table>
+        <!-- 페이징 처리 시작 -->
+        <div th:if="${!wroteQuestions.isEmpty()}">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${!wroteQuestions.hasPrevious} ? 'disabled'">
+                    <a class="page-link" th:href="@{|?question-page=${wroteQuestions.number - 1}|}" th:data-page="${wroteQuestions.number - 1}">
+                        <span>이전</span>
+                    </a>
+                </li>
+                <li th:each="page: ${#numbers.sequence(0, (wroteQuestions.totalPages)-1)}"
+                    th:if="${page >= (wroteQuestions.number)-5 and page <= (wroteQuestions.number)+5}"
+                    th:classappend="${page == wroteQuestions.number} ? 'active'" class="page-item">
+                    <a th:text="${page}" class="page-link" href="javascript:void(0)" th:data-page="${page}"></a>
+                </li>
+                <li class="page-item" th:classappend="${!wroteQuestions.hasNext} ? 'disabled'">
+                    <a class="page-link" href="javascript:void(0)" th:data-page="${wroteQuestions.number+1}">
+                        <span>다음</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <h2 class="border-bottom py-2" >내 답변</h2>
+    <div class="card my-3">
+        <div class="card my-3" th:each="answer, loop : ${wroteAnswers}">
+            <a th:id="|answer_${answer.id}|"></a>
+            <div class="card-body">
+                <div class="card-text" th:utext="${@commonUtil.markdown(answer.content)}"></div>
+                <div class="d-flex justify-content-end">
+                    <div th:if="${answer.updatedAt != null}" class="badge bg-light text-dark p-2 text-start mx-3">
+                        <div class="mb-2">updated at</div>
+                        <div th:text="${#temporals.format(answer.updatedAt, 'yyyy-MM-dd HH:mm')}"></div>
+                    </div>
+                    <div class="badge bg-light text-dark p-2 text-start">
+                        <div class="mb-2">
+                            <span th:if="${answer.author != null}" th:text="${answer.author.username}"></span>
+                        </div>
+                        <div th:text="${#temporals.format(answer.createdAt, 'yyyy-MM-dd HH:mm')}"></div>
+                    </div>
+                </div>
+                <div class="my-3">
+                    <a th:href="@{|/question/detail/${answer.question.id}|}" class="btn btn-sm btn-outline-secondary"
+                       th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}"
+                       th:text="원본질문"></a>
+                    <a th:href="@{|/answer/modify/${answer.id}|}" class="btn btn-sm btn-outline-secondary"
+                       sec:authorize="isAuthenticated()"
+                       th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}"
+                       th:text="수정"></a>
+                    <a href="javascript:void(0);" th:data-uri="@{|/answer/delete/${answer.id}|}"
+                       class="delete btn btn-sm btn-outline-secondary" sec:authorize="isAuthenticated()"
+                       th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}"
+                       th:text="삭제"></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 답변 페이징 처리 시작 -->
+        <div th:if="${!wroteAnswers.isEmpty()}">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${!wroteAnswers.hasPrevious} ? 'disabled'">
+                    <a class="page-link" th:href="@{|?answer-page=${wroteAnswers.number - 1}|}" th:data-page="${wroteAnswers.number - 1}">
+                        <span>이전</span>
+                    </a>
+                </li>
+                <li th:each="page: ${#numbers.sequence(0, wroteAnswers.totalPages - 1)}"
+                    th:if="${page >= wroteAnswers.number - 5 and page <= wroteAnswers.number + 5}"
+                    th:classappend="${page == wroteAnswers.number} ? 'active'"
+                    class="page-item">
+                </li>
+                <li class="page-item" th:classappend="${!wroteAnswers.hasNext()} ? 'disabled'">
+                    <a class="page-link" th:href="@{|?answer-page=${wroteAnswers.number + 1}|}" th:data-page="${wroteAnswers.number + 1}">
+                        <span>다음</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<script layout:fragment="script" type='text/javascript'>
+    const page_elements = document.getElementsByClassName("page-link");
+    Array.from(page_elements).forEach(function (element) {
+        element.addEventListener('click', function () {
+            document.getElementById('page').value = this.dataset.page;
+            document.getElementById('searchForm').submit();
+        });
+    });
+    const btn_search = document.getElementById("btn_search");
+    btn_search.addEventListener('click', function () {
+        document.getElementById('kw').value = document.getElementById('search_kw').value;
+        document.getElementById('page').value = 0;  // 검색버튼을 클릭할 경우 0페이지부터 조회한다.
+        document.getElementById('searchForm').submit();
+    });
+</script>
 </html>
