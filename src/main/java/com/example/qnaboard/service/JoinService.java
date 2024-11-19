@@ -1,9 +1,9 @@
 package com.example.qnaboard.service;
 
+import com.example.qnaboard.DataNotFoundException;
 import com.example.qnaboard.Role;
 import com.example.qnaboard.entity.User;
 import com.example.qnaboard.repository.UserRepository;
-import jakarta.validation.Valid;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +35,7 @@ public class JoinService {
         if(user.isPresent())
             return user.get();
         else{
-            throw new IllegalArgumentException("해당 사용자는 없습니다.");
+            throw new DataNotFoundException("해당 사용자는 없습니다.");
         }
     }
 }

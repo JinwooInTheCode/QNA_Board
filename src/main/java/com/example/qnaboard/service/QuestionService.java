@@ -1,5 +1,6 @@
 package com.example.qnaboard.service;
 
+import com.example.qnaboard.DataNotFoundException;
 import com.example.qnaboard.entity.Answer;
 import com.example.qnaboard.entity.Question;
 import com.example.qnaboard.entity.User;
@@ -54,7 +55,7 @@ public class QuestionService {
         if(question.isPresent())
             return question.get();
         else
-            throw new IllegalStateException("해당 질문이 없습니다.");
+            throw new DataNotFoundException("해당 질문이 없습니다.");
     }
     // 글 작성
     public void create(String title, String content, User user){

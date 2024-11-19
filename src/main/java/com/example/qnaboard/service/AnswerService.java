@@ -1,5 +1,6 @@
 package com.example.qnaboard.service;
 
+import com.example.qnaboard.DataNotFoundException;
 import com.example.qnaboard.entity.Answer;
 import com.example.qnaboard.entity.Question;
 import com.example.qnaboard.entity.User;
@@ -44,9 +45,6 @@ public class AnswerService {
 
     // 댓글 작성
     public Answer add(Question question, String content, User author){
-        // 댓글을 작성할 질문을 찾는다.
-//        Question question = questionRepository.findById(questionId)
-//                .orElseThrow(() -> new IllegalArgumentException("해당 질문이 없습니다."));
         Answer answer = new Answer();
         answer.setQuestion(question);
         answer.setContent(content);
@@ -61,7 +59,7 @@ public class AnswerService {
         if(answer.isPresent())
             return answer.get();
         else
-            throw new IllegalStateException("해당 댓글이 없습니다.");
+            throw new DataNotFoundException("해당 댓글이 없습니다.");
     }
 
     // 댓글 수정
